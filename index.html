@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TESTE – Sorteio Dia das Crianças – Diversões Maracanã</title>
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(160deg,#ffcc00,#ff6f3c);min-height:100vh;color:#222}
+    .card{background:#fff;max-width:420px;margin:24px auto;padding:24px 20px;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+    h1{font-size:22px;margin:0 0 4px;color:#e4002b}
+    h2{font-size:15px;margin:0 0 18px;color:#555;font-weight:normal}
+    label{display:block;font-weight:bold;margin:14px 0 6px;font-size:15px}
+    input{width:100%;box-sizing:border-box;font-size:18px;padding:12px;border:2px solid #ddd;border-radius:10px}
+    input:focus{border-color:#0057b8;outline:none}
+    input[readonly]{background:#f3f3f3;color:#555;caret-color:transparent}
+    button{width:100%;margin-top:20px;padding:15px;font-size:19px;font-weight:bold;color:#fff;background:#0057b8;border:0;border-radius:12px}
+    button:disabled{opacity:.6}
+    .aviso{font-size:12px;color:#666;margin-top:14px;line-height:1.4}
+    .erro{color:#c00;font-weight:bold;margin-top:12px}
+    .ok{text-align:center}
+    .emoji{font-size:48px}
+    .selo{position:fixed;top:8px;right:8px;background:#c00;color:#fff;font:bold 12px Arial;padding:4px 8px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <div class="selo">TESTE</div>
+  <div class="card" id="card">
+    <h1>🎈 Sorteio Dia das Crianças</h1>
+    <h2>Diversões Maracanã – preencha e concorra!</h2>
+    <form id="f" action="https://docs.google.com/forms/d/1FNauRkU9tUTCAfgHPxJ3K-KejtCRv12AwnQGgVqB_MM/formResponse" method="POST">
+      <label for="codigo">Código do cupom</label>
+      <input id="codigo" name="entry.92712855" readonly required>
+      <label for="nome">Seu nome</label>
+      <input id="nome" name="entry.123757403" autocomplete="name" required minlength="3" placeholder="Nome e sobrenome">
+      <label for="whats">WhatsApp (com DDD)</label>
+      <input id="whats" name="entry.683301054" type="tel" inputmode="numeric" autocomplete="tel" required placeholder="(21) 99999-9999">
+      <button id="btn" type="submit">Quero concorrer!</button>
+      <div id="erro" class="erro"></div>
+      <p class="aviso">🔒 Seus dados serão usados apenas para este sorteio e para avisar o ganhador. Cada cupom vale uma única inscrição. O código vem do QR e não pode ser alterado.</p>
+    </form>
+  </div>
+  <script>
+    (function () {
+      var card = document.getElementById("card");
+      var form = document.getElementById("f");
+      var codigo = document.getElementById("codigo");
+      var erro = document.getElementById("erro");
+      var params = new URLSearchParams(location.search);
+      var c = (params.get("c") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (c.indexOf("TST") === 0) c = c.substring(3);
+      var code = c ? ("TST-" + c) : "";
+      if (!code) {
+        card.className = "card ok";
+        card.innerHTML = "<div class=emoji>⚠️</div><h1>Escaneie o QR do cupom</h1><p>Este link de teste precisa do código no cupom. Abra pelo QR ou use ?c=TST-CAQGZ no final do endereço.</p>";
+        return;
+      }
+      codigo.value = code;
+      codigo.addEventListener("keydown", function (e) { e.preventDefault(); });
+      form.addEventListener("submit", function () {
+        document.getElementById("btn").disabled = true;
+        document.getElementById("btn").textContent = "Enviando...";
+      });
+    })();
+  </script>
+</body>
+</html>
