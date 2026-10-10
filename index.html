@@ -77,7 +77,7 @@
             "<div class=emoji>🎉</div><h1>Você está concorrendo" + (r.nome ? ", " + esc(r.nome) : "") + "!</h1>" +
             "<p>Seu número da sorte é</p><p style='font-size:44px;font-weight:bold;color:#0057b8;margin:6px 0'>" + esc(r.numero) + "</p>" +
             "<p>Código do cupom: <b>" + esc(r.codigo) + "</b></p>" +
-            "<p>O sorteio será ao vivo no Instagram <a href='" + INSTAGRAM_URL + "' target=_blank rel=noopener>" + INSTAGRAM + "</a>.</p>" +
+            "<p>O sorteio será ao vivo no Instagram<br><a href='" + INSTAGRAM_URL + "' target=_blank rel=noopener>" + INSTAGRAM + "</a>.</p>" +
             "<p>Se você ganhar, avisaremos pelo WhatsApp. Tire um print desta tela! 📸</p>" +
             "<p class=aviso>Diversões Maracanã – TESTE Dia das Crianças</p>";
           return;
@@ -102,7 +102,6 @@
         "<img class=logo src=logo.png alt='Diversões Maracanã'>" +
         "<h1>Sorteio Dia das Crianças</h1>" +
         "<h2>Preencha e concorra!</h2>" +
-        "<p class=insta><a href='" + INSTAGRAM_URL + "' target=_blank rel=noopener>" + INSTAGRAM + "</a></p>" +
         "<form id=f method=POST target=sorteio-envio action='" + BACKEND + "'>" +
         "<input type=hidden name=acao value=sorteio>" +
         "<label>Código do cupom</label>" +
