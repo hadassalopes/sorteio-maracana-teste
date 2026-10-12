@@ -10,7 +10,7 @@ A página de inscrição deste repositório (`index.html` na raiz) não foi alte
 
 Abra [`preview/index.html`](../preview/index.html) no navegador. Pode ser o arquivo direto, sem servidor.
 
-É um ensaio com **nomes e cupons inventados**. O botão **Sortear agora** gira números reais dessa lista fictícia, solta confete e mostra o número, o primeiro nome e o cupom mascarado (`TST-23•••`). Embaixo ficam o carimbo de Brasília, o hash da lista e a seed. **Sortear novamente** pede confirmação. Nenhum telefone aparece, e nada é gravado na planilha.
+É um ensaio com **nomes e cupons inventados**. A tela mostra o total de números, a roleta e, no fim, o número grande com o primeiro nome. O cupom mascarado, a seed e o hash ficam só no botão **ver auditoria**. **Sortear novamente** pede confirmação. Nenhum telefone aparece, e nada é gravado na planilha.
 
 ## Como o número é escolhido
 
@@ -138,7 +138,7 @@ https://script.google.com/macros/s/ID_DA_IMPLANTACAO/exec?p=sorteio&k=SUA_CHAVE
 
 O `ID_DA_IMPLANTACAO` é o da implantação que você atualizou, não o scriptId do `.clasp.json`.
 
-A tela mostra o total de válidos e a faixa (do menor ao maior número). **Sortear agora** gira esses números, para no ganhador e revela o primeiro nome e o cupom mascarado. Confete. Seed e hash ficam na tela e na aba Auditoria.
+A tela mostra quantos números participam, gira a roleta e revela o número da sorte em destaque com o primeiro nome. Confete. O cupom mascarado, a seed e o hash não ficam na imagem da live: abrem no botão discreto **ver auditoria** e também vão para a aba Auditoria.
 
 Colunas da Auditoria: data/hora de Brasília, origem (`ao vivo` ou `ao vivo (novamente)`), quantidade, número mínimo, número máximo, hash, seed, índice, nº da sorte, nome e código. Sem telefone. A célula A1 tem a mesma receita de conferência. O histórico antigo da aba Sorteio (a partir da linha 21) continua, agora com a origem `ao vivo`, e as células A11, A13 e A14 são atualizadas como antes.
 

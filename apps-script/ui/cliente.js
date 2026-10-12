@@ -3,7 +3,7 @@
  * Math.random aqui só embaralha a ordem em que os números passam na roleta.
  */
 function iniciarAoVivo(cfg) {
-  var ALTURA = 132;
+  var ALTURA = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--altura'), 10) || 176;
   var numerosAtuais = [];
   var digsAtuais = 2;
   var ocupado = false;
@@ -17,20 +17,20 @@ function iniciarAoVivo(cfg) {
     faixa: document.getElementById('faixa-preview'),
     sub: document.getElementById('sub'),
     total: document.getElementById('pill-total'),
-    faixaNum: document.getElementById('pill-faixa'),
     janela: document.getElementById('janela'),
     reel: document.getElementById('reel'),
     status: document.getElementById('status'),
     resultado: document.getElementById('resultado'),
-    rotulo: document.getElementById('rotulo'),
     nome: document.getElementById('nome'),
-    codigo: document.getElementById('codigo'),
+    codigo: document.getElementById('aud-codigo'),
     quando: document.getElementById('aud-quando'),
     hash: document.getElementById('aud-hash'),
     seed: document.getElementById('aud-seed'),
     indice: document.getElementById('aud-indice'),
     btn: document.getElementById('btn-sortear'),
     deNovo: document.getElementById('btn-novamente'),
+    verAuditoria: document.getElementById('btn-auditoria'),
+    painelAuditoria: document.getElementById('painel-auditoria'),
     erro: document.getElementById('erro'),
     modal: document.getElementById('modal'),
     canvas: document.getElementById('confete')
@@ -39,8 +39,8 @@ function iniciarAoVivo(cfg) {
   if (cfg.teste) el.selo.hidden = false;
   if (cfg.preview) {
     el.faixa.hidden = false;
-    el.sub.textContent = 'Pré-visualização com dados fictícios';
-  } else if (cfg.teste) {
+  }
+  if (cfg.teste) {
     el.sub.textContent = 'Ensaio · ao vivo em 18 de outubro';
   } else {
     el.sub.textContent = 'Ao vivo · 18 de outubro';
@@ -91,7 +91,6 @@ function iniciarAoVivo(cfg) {
     numerosAtuais = (r && r.numeros) ? r.numeros.slice() : [];
     digsAtuais = calcularDigitos(numerosAtuais.length ? numerosAtuais : ['0']);
     texto(el.total, total ? String(total) : '0');
-    texto(el.faixaNum, total ? textoFaixa(r.menor, r.maior) : '—');
     el.btn.disabled = !total;
     if (!total) {
       texto(el.status, 'Ainda não há inscrições válidas.');
@@ -107,22 +106,27 @@ function iniciarAoVivo(cfg) {
     el.erro.hidden = !msg;
   }
 
+  function fecharAuditoria() {
+    el.painelAuditoria.hidden = true;
+  }
+
   function esconderResultado() {
     el.resultado.hidden = true;
+    el.verAuditoria.hidden = true;
+    fecharAuditoria();
   }
 
   function mostrarGanhador(r) {
-    var deNovo = String(r.origem || '').indexOf('novamente') >= 0;
-    texto(el.rotulo, deNovo ? 'Novo sorteio' : 'Número da sorte');
     texto(el.nome, r.primeiroNome || 'Participante');
-    texto(el.codigo, 'Cupom ' + (r.codigoMascara || '•••••'));
+    texto(el.codigo, r.codigoMascara || '•••••');
     texto(el.quando, r.quando || '');
     texto(el.hash, r.hashLista || '');
     texto(el.seed, r.seed || '');
-    texto(el.indice, 'Índice ' + r.indice + ' de ' + r.total + ' · a contagem começa em 0');
+    texto(el.indice, 'Índice ' + r.indice + ' de ' + r.total + ' · números ' + textoFaixa(r.menor, r.maior));
     el.resultado.hidden = false;
     el.btn.hidden = true;
     el.deNovo.hidden = false;
+    el.verAuditoria.hidden = false;
     mostrarErro('');
   }
 
@@ -325,7 +329,6 @@ function iniciarAoVivo(cfg) {
         digsAtuais = calcularDigitos(numerosAtuais);
         total = r.total;
         texto(el.total, String(r.total));
-        texto(el.faixaNum, textoFaixa(r.menor, r.maior));
       }
       mostrarGanhador(r);
       texto(el.status, '');
@@ -358,6 +361,12 @@ function iniciarAoVivo(cfg) {
       el.modal.querySelector('#modal-confirmar').addEventListener('click', yes);
     });
   }
+
+  el.verAuditoria.addEventListener('click', function () {
+    if (!ultimo) return;
+    el.painelAuditoria.hidden = false;
+  });
+  document.getElementById('auditoria-fechar').addEventListener('click', fecharAuditoria);
 
   el.btn.addEventListener('click', function () { executar(false); });
   el.deNovo.addEventListener('click', function () {

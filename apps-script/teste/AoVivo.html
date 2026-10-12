@@ -14,7 +14,7 @@
       --azul: #0057b8;
       --azul-escuro: #003f86;
       --tinta: #1c2430;
-      --altura: 132px;
+      --altura: 176px;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -113,33 +113,29 @@
       font-size: 14px;
       text-shadow: 0 1px 0 rgba(120, 40, 0, .25);
     }
-    .pills {
-      display: flex;
-      gap: 8px;
+    .total {
+      align-self: center;
       margin-top: 12px;
-    }
-    .pill {
-      flex: 1;
+      min-width: 148px;
       background: #fff;
       border-radius: 16px;
-      padding: 8px 8px 9px;
+      padding: 8px 18px 10px;
       text-align: center;
       box-shadow: 0 6px 0 rgba(255,255,255,.28);
     }
-    .pill b {
+    .total b {
       display: block;
       font-family: Bubble, "Trebuchet MS", cursive;
       font-weight: normal;
-      font-size: clamp(22px, 8cqw, 32px);
+      font-size: clamp(28px, 9cqw, 40px);
       line-height: 1;
       color: var(--azul);
     }
-    .pill span {
+    .total span {
       display: block;
-      margin-top: 3px;
-      font-size: 11px;
+      margin-top: 2px;
+      font-size: 12px;
       font-weight: bold;
-      letter-spacing: .02em;
       color: #667;
     }
     .miolo {
@@ -168,7 +164,7 @@
       align-items: center;
       justify-content: center;
       font-family: Bubble, "Trebuchet MS", cursive;
-      font-size: clamp(64px, 22cqw, 92px);
+      font-size: clamp(84px, 28cqw, 128px);
       line-height: 1;
       color: var(--azul);
       user-select: none;
@@ -211,60 +207,47 @@
       font-size: 14px;
       text-shadow: 0 1px 0 rgba(120, 40, 0, .25);
     }
-    .resultado { text-align: center; margin-top: 4px; }
+    .resultado { text-align: center; margin-top: 2px; }
     .resultado[hidden] { display: none; }
-    .rotulo {
-      margin: 0;
-      color: #fff;
-      font-size: 13px;
-      font-weight: bold;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      text-shadow: 0 1px 0 rgba(120, 40, 0, .25);
-    }
     .nome {
-      margin: 2px 0 6px;
+      margin: 0;
       font-family: Bubble, "Trebuchet MS", cursive;
       font-weight: normal;
-      font-size: clamp(36px, 12cqw, 52px);
+      font-size: clamp(40px, 13cqw, 58px);
       line-height: .95;
       color: #fff;
       text-shadow: 0 3px 0 rgba(160, 40, 0, .25);
     }
-    .codigo {
-      display: inline-block;
-      margin: 0;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: #fff;
-      color: var(--tinta);
+    .legitimidade {
+      margin: 12px 6px 0;
+      text-align: center;
+      color: rgba(255,255,255,.96);
+      font-size: 12px;
+      line-height: 1.4;
+      text-shadow: 0 1px 0 rgba(120, 40, 0, .22);
+    }
+    .ver-auditoria {
+      width: auto;
+      display: block;
+      margin: 6px auto 0;
+      padding: 4px 8px;
+      background: transparent;
+      color: rgba(255,255,255,.9);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
       font-weight: bold;
-      letter-spacing: .04em;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      box-shadow: none;
     }
-    .auditoria {
-      margin-top: 10px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.94);
-      text-align: left;
-      font-size: 10.5px;
-      line-height: 1.35;
-      color: #333;
-      user-select: text;
-      max-height: 30dvh;
-      overflow: auto;
-    }
-    .auditoria p { margin: 0 0 3px; }
-    .auditoria b { color: var(--azul); }
+    .auditoria p { margin: 0 0 8px; }
+    .auditoria b { display: block; color: var(--azul); font-size: 12px; }
     .mono {
       font-family: "Courier New", Courier, monospace;
-      font-size: 10px;
+      font-size: 12px;
+      line-height: 1.35;
       word-break: break-all;
       color: #222;
-    }
-    .nota-aud {
-      margin: 4px 0 0 !important;
-      color: #666;
     }
     .erro {
       margin: 8px 0 0;
@@ -339,7 +322,7 @@
     .modal-card p { margin: 0 0 14px; line-height: 1.4; }
     .modal-acoes { display: flex; gap: 8px; }
     .modal-acoes button { flex: 1; font-size: 18px; padding: 12px 8px; border-radius: 14px; }
-    #modal-cancelar { background: #f3f3f3; color: #333; }
+    #modal-cancelar, #auditoria-fechar { background: #f3f3f3; color: #333; }
     #modal-confirmar { background: var(--vermelho); color: #fff; }
     @media (min-width: 520px) {
       body { padding: 18px 0; }
@@ -370,10 +353,7 @@
     </header>
     <h1>Sorteio<br>Dia das Crianças</h1>
     <p class="sub" id="sub">Ao vivo · 18 de outubro</p>
-    <div class="pills">
-      <div class="pill"><b id="pill-total">…</b><span>inscrições válidas</span></div>
-      <div class="pill"><b id="pill-faixa">…</b><span>números da sorte</span></div>
-    </div>
+    <div class="total"><b id="pill-total">…</b><span>números participando</span></div>
     <div class="miolo">
       <div class="janela" id="janela">
         <span class="ponteiro esq" aria-hidden="true"></span>
@@ -382,25 +362,28 @@
       </div>
       <p class="status" id="status" role="status">Contando as inscrições válidas…</p>
       <section class="resultado" id="resultado" hidden aria-live="polite">
-        <p class="rotulo" id="rotulo">Número da sorte</p>
         <p class="nome" id="nome"></p>
-        <p class="codigo" id="codigo"></p>
-        <div class="auditoria">
-          <p><b>Carimbo (Brasília)</b></p>
-          <p class="mono" id="aud-quando"></p>
-          <p><b>Hash da lista</b></p>
-          <p class="mono" id="aud-hash"></p>
-          <p><b>Seed</b></p>
-          <p class="mono" id="aud-seed"></p>
-          <p class="mono" id="aud-indice"></p>
-          <p class="nota-aud">SHA-256 do horário de Brasília e da lista de inscritos. O telefone não aparece nesta tela. A conta fica na aba Auditoria.</p>
-        </div>
       </section>
       <p class="erro" id="erro" hidden></p>
     </div>
+    <p class="legitimidade">Sorteio realizado de forma aleatória e auditável entre todas as inscrições válidas. Resultado registrado automaticamente com data e hora.</p>
     <div class="acoes">
       <button class="principal" id="btn-sortear" type="button" disabled>Sortear agora</button>
       <button class="secundario" id="btn-novamente" type="button" hidden>Sortear novamente</button>
+      <button class="ver-auditoria" id="btn-auditoria" type="button" hidden>ver auditoria</button>
+    </div>
+    <div class="modal" id="painel-auditoria" hidden>
+      <div class="modal-card auditoria">
+        <h2>Auditoria</h2>
+        <p><b>Cupom</b><span class="mono" id="aud-codigo"></span></p>
+        <p><b>Data e hora (Brasília)</b><span class="mono" id="aud-quando"></span></p>
+        <p><b>Hash da lista</b><span class="mono" id="aud-hash"></span></p>
+        <p><b>Seed</b><span class="mono" id="aud-seed"></span></p>
+        <p class="mono" id="aud-indice"></p>
+        <div class="modal-acoes">
+          <button id="auditoria-fechar" type="button">Fechar</button>
+        </div>
+      </div>
     </div>
     <div class="modal" id="modal" hidden>
       <div class="modal-card">
@@ -420,7 +403,7 @@
  * Math.random aqui só embaralha a ordem em que os números passam na roleta.
  */
 function iniciarAoVivo(cfg) {
-  var ALTURA = 132;
+  var ALTURA = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--altura'), 10) || 176;
   var numerosAtuais = [];
   var digsAtuais = 2;
   var ocupado = false;
@@ -434,20 +417,20 @@ function iniciarAoVivo(cfg) {
     faixa: document.getElementById('faixa-preview'),
     sub: document.getElementById('sub'),
     total: document.getElementById('pill-total'),
-    faixaNum: document.getElementById('pill-faixa'),
     janela: document.getElementById('janela'),
     reel: document.getElementById('reel'),
     status: document.getElementById('status'),
     resultado: document.getElementById('resultado'),
-    rotulo: document.getElementById('rotulo'),
     nome: document.getElementById('nome'),
-    codigo: document.getElementById('codigo'),
+    codigo: document.getElementById('aud-codigo'),
     quando: document.getElementById('aud-quando'),
     hash: document.getElementById('aud-hash'),
     seed: document.getElementById('aud-seed'),
     indice: document.getElementById('aud-indice'),
     btn: document.getElementById('btn-sortear'),
     deNovo: document.getElementById('btn-novamente'),
+    verAuditoria: document.getElementById('btn-auditoria'),
+    painelAuditoria: document.getElementById('painel-auditoria'),
     erro: document.getElementById('erro'),
     modal: document.getElementById('modal'),
     canvas: document.getElementById('confete')
@@ -456,8 +439,8 @@ function iniciarAoVivo(cfg) {
   if (cfg.teste) el.selo.hidden = false;
   if (cfg.preview) {
     el.faixa.hidden = false;
-    el.sub.textContent = 'Pré-visualização com dados fictícios';
-  } else if (cfg.teste) {
+  }
+  if (cfg.teste) {
     el.sub.textContent = 'Ensaio · ao vivo em 18 de outubro';
   } else {
     el.sub.textContent = 'Ao vivo · 18 de outubro';
@@ -508,7 +491,6 @@ function iniciarAoVivo(cfg) {
     numerosAtuais = (r && r.numeros) ? r.numeros.slice() : [];
     digsAtuais = calcularDigitos(numerosAtuais.length ? numerosAtuais : ['0']);
     texto(el.total, total ? String(total) : '0');
-    texto(el.faixaNum, total ? textoFaixa(r.menor, r.maior) : '—');
     el.btn.disabled = !total;
     if (!total) {
       texto(el.status, 'Ainda não há inscrições válidas.');
@@ -524,22 +506,27 @@ function iniciarAoVivo(cfg) {
     el.erro.hidden = !msg;
   }
 
+  function fecharAuditoria() {
+    el.painelAuditoria.hidden = true;
+  }
+
   function esconderResultado() {
     el.resultado.hidden = true;
+    el.verAuditoria.hidden = true;
+    fecharAuditoria();
   }
 
   function mostrarGanhador(r) {
-    var deNovo = String(r.origem || '').indexOf('novamente') >= 0;
-    texto(el.rotulo, deNovo ? 'Novo sorteio' : 'Número da sorte');
     texto(el.nome, r.primeiroNome || 'Participante');
-    texto(el.codigo, 'Cupom ' + (r.codigoMascara || '•••••'));
+    texto(el.codigo, r.codigoMascara || '•••••');
     texto(el.quando, r.quando || '');
     texto(el.hash, r.hashLista || '');
     texto(el.seed, r.seed || '');
-    texto(el.indice, 'Índice ' + r.indice + ' de ' + r.total + ' · a contagem começa em 0');
+    texto(el.indice, 'Índice ' + r.indice + ' de ' + r.total + ' · números ' + textoFaixa(r.menor, r.maior));
     el.resultado.hidden = false;
     el.btn.hidden = true;
     el.deNovo.hidden = false;
+    el.verAuditoria.hidden = false;
     mostrarErro('');
   }
 
@@ -742,7 +729,6 @@ function iniciarAoVivo(cfg) {
         digsAtuais = calcularDigitos(numerosAtuais);
         total = r.total;
         texto(el.total, String(r.total));
-        texto(el.faixaNum, textoFaixa(r.menor, r.maior));
       }
       mostrarGanhador(r);
       texto(el.status, '');
@@ -775,6 +761,12 @@ function iniciarAoVivo(cfg) {
       el.modal.querySelector('#modal-confirmar').addEventListener('click', yes);
     });
   }
+
+  el.verAuditoria.addEventListener('click', function () {
+    if (!ultimo) return;
+    el.painelAuditoria.hidden = false;
+  });
+  document.getElementById('auditoria-fechar').addEventListener('click', fecharAuditoria);
 
   el.btn.addEventListener('click', function () { executar(false); });
   el.deNovo.addEventListener('click', function () {
