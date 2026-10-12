@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ff9a1f">
+  <title>Sorteio ao vivo – Diversões Maracanã</title>
+  <style>
+    @@FONTE_FACE@@
+    :root {
+      --amarelo: #ffcc00;
+      --laranja: #ff6f3c;
+      --vermelho: #e4002b;
+      --azul: #0057b8;
+      --azul-escuro: #003f86;
+      --tinta: #1c2430;
+      --altura: 176px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--tinta);
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(255,255,255,.45), transparent 32%),
+        linear-gradient(165deg, #ffcc00 0%, #ffb000 46%, #ff6f3c 100%);
+    }
+    .faixa-preview {
+      width: min(100%, 460px);
+      margin: 0 auto;
+      padding: 8px 14px 0;
+      text-align: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #5c2a00;
+    }
+    .palco {
+      width: min(100vw, calc(100dvh * 9 / 16));
+      height: 100dvh;
+      max-height: 100dvh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      container-type: inline-size;
+      padding:
+        max(16px, env(safe-area-inset-top))
+        18px
+        max(14px, env(safe-area-inset-bottom));
+      overflow: auto;
+    }
+    body:has(#faixa-preview:not([hidden])) .palco {
+      height: calc(100dvh - 34px);
+      max-height: calc(100dvh - 34px);
+    }
+    .selo {
+      position: absolute;
+      top: max(10px, env(safe-area-inset-top));
+      right: 10px;
+      z-index: 6;
+      background: #c00;
+      color: #fff;
+      font: bold 12px Arial, Helvetica, sans-serif;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .marca {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding-right: 52px;
+    }
+    .logo {
+      height: 62px;
+      width: auto;
+      max-width: 42%;
+      background: #fff;
+      border-radius: 14px;
+      padding: 6px 8px;
+      object-fit: contain;
+      box-shadow: 0 6px 16px rgba(120, 40, 0, .12);
+    }
+    .jumb {
+      height: 62px;
+      flex: 1;
+      width: 0;
+      object-fit: cover;
+      object-position: center 42%;
+      border-radius: 14px;
+      border: 3px solid #fff;
+      box-shadow: 0 6px 16px rgba(120, 40, 0, .12);
+    }
+    h1 {
+      margin: 12px 0 0;
+      text-align: center;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-weight: normal;
+      font-size: clamp(28px, 9cqw, 40px);
+      line-height: .95;
+      color: var(--vermelho);
+      text-shadow: 0 2px 0 rgba(255,255,255,.45);
+    }
+    .sub {
+      margin: 6px 0 0;
+      text-align: center;
+      color: #fff;
+      font-weight: bold;
+      font-size: 14px;
+      text-shadow: 0 1px 0 rgba(120, 40, 0, .25);
+    }
+    .total {
+      align-self: center;
+      margin-top: 12px;
+      min-width: 148px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 8px 18px 10px;
+      text-align: center;
+      box-shadow: 0 6px 0 rgba(255,255,255,.28);
+    }
+    .total b {
+      display: block;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-weight: normal;
+      font-size: clamp(28px, 9cqw, 40px);
+      line-height: 1;
+      color: var(--azul);
+    }
+    .total span {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #667;
+    }
+    .miolo {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+      margin-top: 8px;
+    }
+    .janela {
+      position: relative;
+      box-sizing: content-box;
+      height: var(--altura);
+      overflow: hidden;
+      background: #fff;
+      border: 4px solid var(--azul);
+      border-radius: 26px;
+      box-shadow: 0 10px 0 rgba(0, 50, 110, .18), inset 0 0 0 4px rgba(255, 204, 0, .35);
+    }
+    .reel { will-change: transform; }
+    .n {
+      height: var(--altura);
+      padding: 0 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-size: clamp(84px, 28cqw, 128px);
+      line-height: 1;
+      color: var(--azul);
+      user-select: none;
+    }
+    .janela.girando .n { filter: blur(1.4px); }
+    .janela.parado {
+      border-color: var(--vermelho);
+      box-shadow: 0 10px 0 rgba(140, 0, 30, .16), inset 0 0 0 4px rgba(255, 204, 0, .55);
+    }
+    .janela.parado .n {
+      color: var(--vermelho);
+      filter: none;
+    }
+    .ponteiro {
+      position: absolute;
+      top: 50%;
+      z-index: 3;
+      width: 0;
+      height: 0;
+      transform: translateY(-50%);
+    }
+    .ponteiro.esq {
+      left: 8px;
+      border-top: 11px solid transparent;
+      border-bottom: 11px solid transparent;
+      border-left: 16px solid var(--vermelho);
+    }
+    .ponteiro.dir {
+      right: 8px;
+      border-top: 11px solid transparent;
+      border-bottom: 11px solid transparent;
+      border-right: 16px solid var(--vermelho);
+    }
+    .status {
+      min-height: 1.3em;
+      margin: 8px 0 0;
+      text-align: center;
+      color: #fff;
+      font-weight: bold;
+      font-size: 14px;
+      text-shadow: 0 1px 0 rgba(120, 40, 0, .25);
+    }
+    .resultado { text-align: center; margin-top: 2px; }
+    .resultado[hidden] { display: none; }
+    .nome {
+      margin: 0;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-weight: normal;
+      font-size: clamp(40px, 13cqw, 58px);
+      line-height: .95;
+      color: #fff;
+      text-shadow: 0 3px 0 rgba(160, 40, 0, .25);
+    }
+    .legitimidade {
+      margin: 12px 6px 0;
+      text-align: center;
+      color: rgba(255,255,255,.96);
+      font-size: 12px;
+      line-height: 1.4;
+      text-shadow: 0 1px 0 rgba(120, 40, 0, .22);
+    }
+    .ver-auditoria {
+      width: auto;
+      display: block;
+      margin: 6px auto 0;
+      padding: 4px 8px;
+      background: transparent;
+      color: rgba(255,255,255,.9);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      font-weight: bold;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      box-shadow: none;
+    }
+    .auditoria p { margin: 0 0 8px; }
+    .auditoria b { display: block; color: var(--azul); font-size: 12px; }
+    .mono {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+      line-height: 1.35;
+      word-break: break-all;
+      color: #222;
+    }
+    .erro {
+      margin: 8px 0 0;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--vermelho);
+      font-weight: bold;
+      text-align: center;
+    }
+    .erro[hidden] { display: none; }
+    .acoes { margin-top: 10px; }
+    button {
+      width: 100%;
+      border: 0;
+      cursor: pointer;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      touch-action: manipulation;
+    }
+    button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+    .principal {
+      padding: 14px 16px 12px;
+      border-radius: 18px;
+      background: var(--azul);
+      color: #fff;
+      font-size: clamp(26px, 8cqw, 34px);
+      box-shadow: 0 7px 0 var(--azul-escuro);
+    }
+    .principal:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 3px 0 var(--azul-escuro); }
+    .principal:disabled { opacity: .55; }
+    .secundario {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.95);
+      color: var(--vermelho);
+      font-size: 22px;
+      box-shadow: 0 5px 0 rgba(255,255,255,.35);
+    }
+    .secundario:disabled { opacity: .55; }
+    [hidden] { display: none !important; }
+    .confete {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 7;
+    }
+    .modal {
+      position: absolute;
+      inset: 0;
+      z-index: 9;
+      display: flex;
+      align-items: flex-end;
+      padding: 16px;
+      background: rgba(40, 16, 0, .35);
+    }
+    .modal-card {
+      width: 100%;
+      background: #fff;
+      border-radius: 20px;
+      padding: 18px 16px 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.2);
+    }
+    .modal-card h2 {
+      margin: 0 0 8px;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-weight: normal;
+      font-size: 28px;
+      color: var(--vermelho);
+    }
+    .modal-card p { margin: 0 0 14px; line-height: 1.4; }
+    .modal-acoes { display: flex; gap: 8px; }
+    .modal-acoes button { flex: 1; font-size: 18px; padding: 12px 8px; border-radius: 14px; }
+    #modal-cancelar, #auditoria-fechar { background: #f3f3f3; color: #333; }
+    #modal-confirmar { background: var(--vermelho); color: #fff; }
+    @media (min-width: 520px) {
+      body { padding: 18px 0; }
+      .palco {
+        height: min(100dvh - 36px, 920px);
+        max-height: min(100dvh - 36px, 920px);
+        border-radius: 28px;
+        box-shadow: 0 18px 50px rgba(120, 40, 0, .28);
+      }
+      body:has(#faixa-preview:not([hidden])) .palco {
+        height: min(100dvh - 78px, 920px);
+        max-height: min(100dvh - 78px, 920px);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .janela.girando .n { filter: none; }
+    }
+  </style>
+</head>
+<body>
+  <p class="faixa-preview" id="faixa-preview" hidden>Pré-visualização. Nomes e cupons são fictícios. Nada aqui grava na planilha.</p>
+  <main class="palco" id="palco">
+    <div class="selo" id="selo" hidden>TESTE</div>
+    <canvas class="confete" id="confete" aria-hidden="true"></canvas>
+    <header class="marca">
+      <img class="logo" src="@@LOGO_SRC@@" alt="Diversões Maracanã">
+      <img class="jumb" src="@@JUMB_SRC@@" alt="Jumbinho">
+    </header>
+    <h1>Sorteio<br>Dia das Crianças</h1>
+    <p class="sub" id="sub">Ao vivo · 18 de outubro</p>
+    <div class="total"><b id="pill-total">…</b><span>números participando</span></div>
+    <div class="miolo">
+      <div class="janela" id="janela">
+        <span class="ponteiro esq" aria-hidden="true"></span>
+        <span class="ponteiro dir" aria-hidden="true"></span>
+        <div class="reel" id="reel"></div>
+      </div>
+      <p class="status" id="status" role="status">Contando as inscrições válidas…</p>
+      <section class="resultado" id="resultado" hidden aria-live="polite">
+        <p class="nome" id="nome"></p>
+      </section>
+      <p class="erro" id="erro" hidden></p>
+    </div>
+    <p class="legitimidade">Sorteio realizado de forma aleatória e auditável entre todas as inscrições válidas. Resultado registrado automaticamente com data e hora.</p>
+    <div class="acoes">
+      <button class="principal" id="btn-sortear" type="button" disabled>Sortear agora</button>
+      <button class="secundario" id="btn-novamente" type="button" hidden>Sortear novamente</button>
+      <button class="ver-auditoria" id="btn-auditoria" type="button" hidden>ver auditoria</button>
+    </div>
+    <div class="modal" id="painel-auditoria" hidden>
+      <div class="modal-card auditoria">
+        <h2>Auditoria</h2>
+        <p><b>Cupom</b><span class="mono" id="aud-codigo"></span></p>
+        <p><b>Data e hora (Brasília)</b><span class="mono" id="aud-quando"></span></p>
+        <p><b>Hash da lista</b><span class="mono" id="aud-hash"></span></p>
+        <p><b>Seed</b><span class="mono" id="aud-seed"></span></p>
+        <p class="mono" id="aud-indice"></p>
+        <div class="modal-acoes">
+          <button id="auditoria-fechar" type="button">Fechar</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="modal" hidden>
+      <div class="modal-card">
+        <h2>Sortear de novo?</h2>
+        <p>Use só se não conseguir falar com a pessoa sorteada. O resultado de agora continua na planilha, e o novo também entra na auditoria.</p>
+        <div class="modal-acoes">
+          <button id="modal-cancelar" type="button">Cancelar</button>
+          <button id="modal-confirmar" type="button">Sortear novamente</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  @@PURO_TAG@@
+  <script>
+@@CLIENTE@@
+@@BOOT@@
+  </script>
+</body>
+</html>

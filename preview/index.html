@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ff9a1f">
+  <title>Sorteio ao vivo – Diversões Maracanã</title>
+  <style>
+    @font-face{font-family:Bubble;src:url("fonts/BubblegumSans-Regular.ttf") format("truetype");font-display:swap}
+    :root {
+      --amarelo: #ffcc00;
+      --laranja: #ff6f3c;
+      --vermelho: #e4002b;
+      --azul: #0057b8;
+      --azul-escuro: #003f86;
+      --tinta: #1c2430;
+      --altura: 176px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--tinta);
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(255,255,255,.45), transparent 32%),
+        linear-gradient(165deg, #ffcc00 0%, #ffb000 46%, #ff6f3c 100%);
+    }
+    .faixa-preview {
+      width: min(100%, 460px);
+      margin: 0 auto;
+      padding: 8px 14px 0;
+      text-align: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #5c2a00;
+    }
+    .palco {
+      width: min(100vw, calc(100dvh * 9 / 16));
+      height: 100dvh;
+      max-height: 100dvh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      container-type: inline-size;
+      padding:
+        max(16px, env(safe-area-inset-top))
+        18px
+        max(14px, env(safe-area-inset-bottom));
+      overflow: auto;
+    }
+    body:has(#faixa-preview:not([hidden])) .palco {
+      height: calc(100dvh - 34px);
+      max-height: calc(100dvh - 34px);
+    }
+    .selo {
+      position: absolute;
+      top: max(10px, env(safe-area-inset-top));
+      right: 10px;
+      z-index: 6;
+      background: #c00;
+      color: #fff;
+      font: bold 12px Arial, Helvetica, sans-serif;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .marca {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding-right: 52px;
+    }
+    .logo {
+      height: 62px;
+      width: auto;
+      max-width: 42%;
+      background: #fff;
+      border-radius: 14px;
+      padding: 6px 8px;
+      object-fit: contain;
+      box-shadow: 0 6px 16px rgba(120, 40, 0, .12);
+    }
+    .jumb {
+      height: 62px;
+      flex: 1;
+      width: 0;
+      object-fit: cover;
+      object-position: center 42%;
+      border-radius: 14px;
+      border: 3px solid #fff;
+      box-shadow: 0 6px 16px rgba(120, 40, 0, .12);
+    }
+    h1 {
+      margin: 12px 0 0;
+      text-align: center;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-weight: normal;
+      font-size: clamp(28px, 9cqw, 40px);
+      line-height: .95;
+      color: var(--vermelho);
+      text-shadow: 0 2px 0 rgba(255,255,255,.45);
+    }
+    .sub {
+      margin: 6px 0 0;
+      text-align: center;
+      color: #fff;
+      font-weight: bold;
+      font-size: 14px;
+      text-shadow: 0 1px 0 rgba(120, 40, 0, .25);
+    }
+    .total {
+      align-self: center;
+      margin-top: 12px;
+      min-width: 148px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 8px 18px 10px;
+      text-align: center;
+      box-shadow: 0 6px 0 rgba(255,255,255,.28);
+    }
+    .total b {
+      display: block;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-weight: normal;
+      font-size: clamp(28px, 9cqw, 40px);
+      line-height: 1;
+      color: var(--azul);
+    }
+    .total span {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #667;
+    }
+    .miolo {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+      margin-top: 8px;
+    }
+    .janela {
+      position: relative;
+      box-sizing: content-box;
+      height: var(--altura);
+      overflow: hidden;
+      background: #fff;
+      border: 4px solid var(--azul);
+      border-radius: 26px;
+      box-shadow: 0 10px 0 rgba(0, 50, 110, .18), inset 0 0 0 4px rgba(255, 204, 0, .35);
+    }
+    .reel { will-change: transform; }
+    .n {
+      height: var(--altura);
+      padding: 0 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-size: clamp(84px, 28cqw, 128px);
+      line-height: 1;
+      color: var(--azul);
+      user-select: none;
+    }
+    .janela.girando .n { filter: blur(1.4px); }
+    .janela.parado {
+      border-color: var(--vermelho);
+      box-shadow: 0 10px 0 rgba(140, 0, 30, .16), inset 0 0 0 4px rgba(255, 204, 0, .55);
+    }
+    .janela.parado .n {
+      color: var(--vermelho);
+      filter: none;
+    }
+    .ponteiro {
+      position: absolute;
+      top: 50%;
+      z-index: 3;
+      width: 0;
+      height: 0;
+      transform: translateY(-50%);
+    }
+    .ponteiro.esq {
+      left: 8px;
+      border-top: 11px solid transparent;
+      border-bottom: 11px solid transparent;
+      border-left: 16px solid var(--vermelho);
+    }
+    .ponteiro.dir {
+      right: 8px;
+      border-top: 11px solid transparent;
+      border-bottom: 11px solid transparent;
+      border-right: 16px solid var(--vermelho);
+    }
+    .status {
+      min-height: 1.3em;
+      margin: 8px 0 0;
+      text-align: center;
+      color: #fff;
+      font-weight: bold;
+      font-size: 14px;
+      text-shadow: 0 1px 0 rgba(120, 40, 0, .25);
+    }
+    .resultado { text-align: center; margin-top: 2px; }
+    .resultado[hidden] { display: none; }
+    .nome {
+      margin: 0;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-weight: normal;
+      font-size: clamp(40px, 13cqw, 58px);
+      line-height: .95;
+      color: #fff;
+      text-shadow: 0 3px 0 rgba(160, 40, 0, .25);
+    }
+    .legitimidade {
+      margin: 12px 6px 0;
+      text-align: center;
+      color: rgba(255,255,255,.96);
+      font-size: 12px;
+      line-height: 1.4;
+      text-shadow: 0 1px 0 rgba(120, 40, 0, .22);
+    }
+    .ver-auditoria {
+      width: auto;
+      display: block;
+      margin: 6px auto 0;
+      padding: 4px 8px;
+      background: transparent;
+      color: rgba(255,255,255,.9);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      font-weight: bold;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      box-shadow: none;
+    }
+    .auditoria p { margin: 0 0 8px; }
+    .auditoria b { display: block; color: var(--azul); font-size: 12px; }
+    .mono {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+      line-height: 1.35;
+      word-break: break-all;
+      color: #222;
+    }
+    .erro {
+      margin: 8px 0 0;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--vermelho);
+      font-weight: bold;
+      text-align: center;
+    }
+    .erro[hidden] { display: none; }
+    .acoes { margin-top: 10px; }
+    button {
+      width: 100%;
+      border: 0;
+      cursor: pointer;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      touch-action: manipulation;
+    }
+    button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+    .principal {
+      padding: 14px 16px 12px;
+      border-radius: 18px;
+      background: var(--azul);
+      color: #fff;
+      font-size: clamp(26px, 8cqw, 34px);
+      box-shadow: 0 7px 0 var(--azul-escuro);
+    }
+    .principal:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 3px 0 var(--azul-escuro); }
+    .principal:disabled { opacity: .55; }
+    .secundario {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.95);
+      color: var(--vermelho);
+      font-size: 22px;
+      box-shadow: 0 5px 0 rgba(255,255,255,.35);
+    }
+    .secundario:disabled { opacity: .55; }
+    [hidden] { display: none !important; }
+    .confete {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 7;
+    }
+    .modal {
+      position: absolute;
+      inset: 0;
+      z-index: 9;
+      display: flex;
+      align-items: flex-end;
+      padding: 16px;
+      background: rgba(40, 16, 0, .35);
+    }
+    .modal-card {
+      width: 100%;
+      background: #fff;
+      border-radius: 20px;
+      padding: 18px 16px 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.2);
+    }
+    .modal-card h2 {
+      margin: 0 0 8px;
+      font-family: Bubble, "Trebuchet MS", cursive;
+      font-weight: normal;
+      font-size: 28px;
+      color: var(--vermelho);
+    }
+    .modal-card p { margin: 0 0 14px; line-height: 1.4; }
+    .modal-acoes { display: flex; gap: 8px; }
+    .modal-acoes button { flex: 1; font-size: 18px; padding: 12px 8px; border-radius: 14px; }
+    #modal-cancelar, #auditoria-fechar { background: #f3f3f3; color: #333; }
+    #modal-confirmar { background: var(--vermelho); color: #fff; }
+    @media (min-width: 520px) {
+      body { padding: 18px 0; }
+      .palco {
+        height: min(100dvh - 36px, 920px);
+        max-height: min(100dvh - 36px, 920px);
+        border-radius: 28px;
+        box-shadow: 0 18px 50px rgba(120, 40, 0, .28);
+      }
+      body:has(#faixa-preview:not([hidden])) .palco {
+        height: min(100dvh - 78px, 920px);
+        max-height: min(100dvh - 78px, 920px);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .janela.girando .n { filter: none; }
+    }
+  </style>
+</head>
+<body>
+  <p class="faixa-preview" id="faixa-preview" hidden>Pré-visualização. Nomes e cupons são fictícios. Nada aqui grava na planilha.</p>
+  <main class="palco" id="palco">
+    <div class="selo" id="selo" hidden>TESTE</div>
+    <canvas class="confete" id="confete" aria-hidden="true"></canvas>
+    <header class="marca">
+      <img class="logo" src="../logo.png" alt="Diversões Maracanã">
+      <img class="jumb" src="jumbinho-sorteio.jpg" alt="Jumbinho">
+    </header>
+    <h1>Sorteio<br>Dia das Crianças</h1>
+    <p class="sub" id="sub">Ao vivo · 18 de outubro</p>
+    <div class="total"><b id="pill-total">…</b><span>números participando</span></div>
+    <div class="miolo">
+      <div class="janela" id="janela">
+        <span class="ponteiro esq" aria-hidden="true"></span>
+        <span class="ponteiro dir" aria-hidden="true"></span>
+        <div class="reel" id="reel"></div>
+      </div>
+      <p class="status" id="status" role="status">Contando as inscrições válidas…</p>
+      <section class="resultado" id="resultado" hidden aria-live="polite">
+        <p class="nome" id="nome"></p>
+      </section>
+      <p class="erro" id="erro" hidden></p>
+    </div>
+    <p class="legitimidade">Sorteio realizado de forma aleatória e auditável entre todas as inscrições válidas. Resultado registrado automaticamente com data e hora.</p>
+    <div class="acoes">
+      <button class="principal" id="btn-sortear" type="button" disabled>Sortear agora</button>
+      <button class="secundario" id="btn-novamente" type="button" hidden>Sortear novamente</button>
+      <button class="ver-auditoria" id="btn-auditoria" type="button" hidden>ver auditoria</button>
+    </div>
+    <div class="modal" id="painel-auditoria" hidden>
+      <div class="modal-card auditoria">
+        <h2>Auditoria</h2>
+        <p><b>Cupom</b><span class="mono" id="aud-codigo"></span></p>
+        <p><b>Data e hora (Brasília)</b><span class="mono" id="aud-quando"></span></p>
+        <p><b>Hash da lista</b><span class="mono" id="aud-hash"></span></p>
+        <p><b>Seed</b><span class="mono" id="aud-seed"></span></p>
+        <p class="mono" id="aud-indice"></p>
+        <div class="modal-acoes">
+          <button id="auditoria-fechar" type="button">Fechar</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="modal" hidden>
+      <div class="modal-card">
+        <h2>Sortear de novo?</h2>
+        <p>Use só se não conseguir falar com a pessoa sorteada. O resultado de agora continua na planilha, e o novo também entra na auditoria.</p>
+        <div class="modal-acoes">
+          <button id="modal-cancelar" type="button">Cancelar</button>
+          <button id="modal-confirmar" type="button">Sortear novamente</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+/**
+ * Sorteio verificável do Dia das Crianças.
+ * A mesma função roda no Apps Script (V8), no preview e no teste Node.
+ * Não usa Math.random. Não lê telefone. Não guarda telefone no texto hasheado.
+ *
+ * Conta, com a lista já ordenada:
+ *   hash = SHA-256( linha "numero|codigo|nome" por inscrito, separadas por \n )
+ *   seed = SHA-256( carimbo de Brasília + "\n" + hash )
+ *   índice = inteiro(seed) módulo quantidade   (posição 0 é o primeiro da lista)
+ */
+var SorteioPuro = (function () {
+  var K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+
+  function rotr(x, n) {
+    return ((x >>> n) | (x << (32 - n))) >>> 0;
+  }
+
+  function utf8(texto) {
+    var s = String(texto);
+    var out = [];
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c < 0x80) {
+        out.push(c);
+      } else if (c < 0x800) {
+        out.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+      } else if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) {
+        var c2 = s.charCodeAt(++i);
+        var u = ((c - 0xd800) << 10) + (c2 - 0xdc00) + 0x10000;
+        out.push(
+          0xf0 | (u >> 18),
+          0x80 | ((u >> 12) & 0x3f),
+          0x80 | ((u >> 6) & 0x3f),
+          0x80 | (u & 0x3f)
+        );
+      } else {
+        out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+      }
+    }
+    return out;
+  }
+
+  function sha256Hex(texto) {
+    var bytes = utf8(texto);
+    var bitLen = bytes.length * 8;
+    bytes.push(0x80);
+    while (bytes.length % 64 !== 56) bytes.push(0);
+    var hi = Math.floor(bitLen / 0x100000000);
+    var lo = bitLen >>> 0;
+    var i;
+    for (i = 3; i >= 0; i--) bytes.push((hi >>> (i * 8)) & 0xff);
+    for (i = 3; i >= 0; i--) bytes.push((lo >>> (i * 8)) & 0xff);
+
+    var H = [
+      0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+      0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+    ];
+
+    for (var off = 0; off < bytes.length; off += 64) {
+      var W = new Array(64);
+      var t;
+      for (t = 0; t < 16; t++) {
+        var p = off + t * 4;
+        W[t] = (((bytes[p] << 24) | (bytes[p + 1] << 16) | (bytes[p + 2] << 8) | bytes[p + 3]) >>> 0);
+      }
+      for (t = 16; t < 64; t++) {
+        var s0 = (rotr(W[t - 15], 7) ^ rotr(W[t - 15], 18) ^ (W[t - 15] >>> 3)) >>> 0;
+        var s1 = (rotr(W[t - 2], 17) ^ rotr(W[t - 2], 19) ^ (W[t - 2] >>> 10)) >>> 0;
+        W[t] = (W[t - 16] + s0 + W[t - 7] + s1) >>> 0;
+      }
+      var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (t = 0; t < 64; t++) {
+        var S1 = (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) >>> 0;
+        var ch = ((e & f) ^ ((~e) & g)) >>> 0;
+        var temp1 = (h + S1 + ch + K[t] + W[t]) >>> 0;
+        var S0 = (rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) >>> 0;
+        var maj = ((a & b) ^ (a & c) ^ (b & c)) >>> 0;
+        var temp2 = (S0 + maj) >>> 0;
+        h = g;
+        g = f;
+        f = e;
+        e = (d + temp1) >>> 0;
+        d = c;
+        c = b;
+        b = a;
+        a = (temp1 + temp2) >>> 0;
+      }
+      H[0] = (H[0] + a) >>> 0;
+      H[1] = (H[1] + b) >>> 0;
+      H[2] = (H[2] + c) >>> 0;
+      H[3] = (H[3] + d) >>> 0;
+      H[4] = (H[4] + e) >>> 0;
+      H[5] = (H[5] + f) >>> 0;
+      H[6] = (H[6] + g) >>> 0;
+      H[7] = (H[7] + h) >>> 0;
+    }
+
+    var hex = '';
+    for (i = 0; i < 8; i++) {
+      var v = H[i];
+      for (var shift = 28; shift >= 0; shift -= 4) {
+        hex += '0123456789abcdef'.charAt((v >>> shift) & 0xf);
+      }
+    }
+    return hex;
+  }
+
+  function nomeCanonico(nome) {
+    return String(nome == null ? '' : nome).replace(/^'/, '').replace(/\s+/g, ' ').trim();
+  }
+
+  function textoNumero(valor) {
+    if (typeof valor === 'number' && isFinite(valor)) return String(Math.trunc(valor));
+    return String(valor == null ? '' : valor).replace(/^'/, '').trim();
+  }
+
+  function terminaEmTeste(nome) {
+    var partes = nomeCanonico(nome).toLowerCase().split(' ');
+    return partes.length > 0 && partes[partes.length - 1] === 'teste';
+  }
+
+  /** Mesmos filtros de realizarSorteio_: Status válido e Nº da sorte preenchido.
+   *  No oficial, ignorarNomeTeste tira quem tem o último nome "teste". */
+  function elegivel(linha, ignorarNomeTeste) {
+    if (!linha) return false;
+    if (String(linha[5] == null ? '' : linha[5]).trim() !== 'válido') return false;
+    if (linha[1] === '' || linha[1] === null || typeof linha[1] === 'undefined') return false;
+    if (textoNumero(linha[1]) === '') return false;
+    if (ignorarNomeTeste && terminaEmTeste(linha[3])) return false;
+    return true;
+  }
+
+  function prepararElegiveis(linhas, ignorarNomeTeste) {
+    var lista = [];
+    for (var i = 0; i < linhas.length; i++) {
+      var r = linhas[i];
+      if (!elegivel(r, ignorarNomeTeste)) continue;
+      lista.push({
+        numero: textoNumero(r[1]),
+        codigo: String(r[2] == null ? '' : r[2]).replace(/^'/, '').trim(),
+        nome: nomeCanonico(r[3])
+      });
+    }
+    lista.sort(function (a, b) {
+      var na = Number(a.numero);
+      var nb = Number(b.numero);
+      var fa = isFinite(na) ? na : Number.MAX_VALUE;
+      var fb = isFinite(nb) ? nb : Number.MAX_VALUE;
+      if (fa !== fb) return fa - fb;
+      if (a.codigo < b.codigo) return -1;
+      if (a.codigo > b.codigo) return 1;
+      if (a.nome < b.nome) return -1;
+      if (a.nome > b.nome) return 1;
+      return 0;
+    });
+    return lista;
+  }
+
+  function canonico(lista) {
+    var linhas = [];
+    for (var i = 0; i < lista.length; i++) {
+      linhas.push(lista[i].numero + '|' + lista[i].codigo + '|' + lista[i].nome);
+    }
+    return linhas.join('\n');
+  }
+
+  function indicePorSeed(seedHex, n) {
+    var total = Number(n);
+    if (!isFinite(total) || total < 1) throw new Error('quantidade inválida');
+    var hex = String(seedHex || '').toLowerCase().replace(/^0x/, '');
+    if (!/^[0-9a-f]{64}$/.test(hex)) throw new Error('seed inválida');
+    return Number(BigInt('0x' + hex) % BigInt(total));
+  }
+
+  function escolher(lista, carimbo) {
+    if (!lista || !lista.length) throw new Error('lista vazia');
+    var texto = canonico(lista);
+    var hashLista = sha256Hex(texto);
+    var quando = String(carimbo);
+    var seed = sha256Hex(quando + '\n' + hashLista);
+    var indice = indicePorSeed(seed, lista.length);
+    return {
+      canonico: texto,
+      hashLista: hashLista,
+      seed: seed,
+      indice: indice,
+      ganhador: lista[indice],
+      quando: quando
+    };
+  }
+
+  function resumir(lista) {
+    if (!lista || !lista.length) {
+      return { ok: true, total: 0, menor: '', maior: '', numeros: [] };
+    }
+    var numeros = [];
+    for (var i = 0; i < lista.length; i++) numeros.push(lista[i].numero);
+    return {
+      ok: true,
+      total: lista.length,
+      menor: lista[0].numero,
+      maior: lista[lista.length - 1].numero,
+      numeros: numeros
+    };
+  }
+
+  function primeiroNome(nome) {
+    var n = nomeCanonico(nome);
+    if (!n) return '';
+    return n.split(' ')[0];
+  }
+
+  function mascararCodigo(codigo) {
+    var c = String(codigo || '').replace(/^'/, '').trim().toUpperCase();
+    var m = c.match(/^([A-Z0-9]+)-([A-Z0-9]+)$/);
+    if (!m) return '•••••';
+    var corpo = m[2];
+    var visiveis = corpo.length <= 2 ? 1 : 2;
+    var esconde = '';
+    for (var i = visiveis; i < corpo.length; i++) esconde += '•';
+    if (!esconde) esconde = '•••';
+    return m[1] + '-' + corpo.slice(0, visiveis) + esconde;
+  }
+
+  /** O que a tela ao vivo pode receber. Sem telefone, sem nome completo, sem código inteiro. */
+  function visaoPublica(g) {
+    var numeros = [];
+    var fonte = g.numeros || [];
+    for (var i = 0; i < fonte.length; i++) numeros.push(String(fonte[i]));
+    return {
+      ok: true,
+      numero: String(g.numero),
+      primeiroNome: primeiroNome(g.nome),
+      codigoMascara: mascararCodigo(g.codigo),
+      total: g.total,
+      menor: String(g.menor),
+      maior: String(g.maior),
+      numeros: numeros,
+      hashLista: g.hashLista,
+      seed: g.seed,
+      quando: g.quando,
+      indice: g.indice,
+      origem: g.origem || ''
+    };
+  }
+
+  /** Mesmo formato gravado na aba Auditoria: yyyy-MM-ddTHH:mm:ss.SSS-03:00 */
+  function carimboDeData(data) {
+    var d = data instanceof Date ? data : new Date(data);
+    var partes = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23'
+    }).formatToParts(d);
+    var map = {};
+    for (var i = 0; i < partes.length; i++) map[partes[i].type] = partes[i].value;
+    var hora = map.hour === '24' ? '00' : map.hour;
+    var ms = String(d.getMilliseconds());
+    while (ms.length < 3) ms = '0' + ms;
+    return map.year + '-' + map.month + '-' + map.day + 'T' + hora + ':' + map.minute + ':' + map.second + '.' + ms + '-03:00';
+  }
+
+  function conferir(carimbo, hashLista, seed, indice, total) {
+    var seedCalculada = sha256Hex(String(carimbo) + '\n' + String(hashLista));
+    var indiceCalculado = indicePorSeed(seedCalculada, total);
+    return {
+      seedConfere: seedCalculada === String(seed),
+      indiceConfere: indiceCalculado === Number(indice),
+      seedCalculada: seedCalculada,
+      indiceCalculado: indiceCalculado
+    };
+  }
+
+  return {
+    sha256Hex: sha256Hex,
+    nomeCanonico: nomeCanonico,
+    textoNumero: textoNumero,
+    terminaEmTeste: terminaEmTeste,
+    elegivel: elegivel,
+    prepararElegiveis: prepararElegiveis,
+    canonico: canonico,
+    indicePorSeed: indicePorSeed,
+    escolher: escolher,
+    resumir: resumir,
+    primeiroNome: primeiroNome,
+    mascararCodigo: mascararCodigo,
+    visaoPublica: visaoPublica,
+    conferir: conferir,
+    carimboDeData: carimboDeData
+  };
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = SorteioPuro;
+
+</script>
+  <script>
+/**
+ * Tela ao vivo. O ganhador já veio da planilha (ou do preview).
+ * Math.random aqui só embaralha a ordem em que os números passam na roleta.
+ */
+function iniciarAoVivo(cfg) {
+  var ALTURA = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--altura'), 10) || 176;
+  var numerosAtuais = [];
+  var digsAtuais = 2;
+  var ocupado = false;
+  var modalAberto = false;
+  var ultimo = null;
+  var total = 0;
+  var pararCiclo = function () {};
+
+  var el = {
+    selo: document.getElementById('selo'),
+    faixa: document.getElementById('faixa-preview'),
+    sub: document.getElementById('sub'),
+    total: document.getElementById('pill-total'),
+    janela: document.getElementById('janela'),
+    reel: document.getElementById('reel'),
+    status: document.getElementById('status'),
+    resultado: document.getElementById('resultado'),
+    nome: document.getElementById('nome'),
+    codigo: document.getElementById('aud-codigo'),
+    quando: document.getElementById('aud-quando'),
+    hash: document.getElementById('aud-hash'),
+    seed: document.getElementById('aud-seed'),
+    indice: document.getElementById('aud-indice'),
+    btn: document.getElementById('btn-sortear'),
+    deNovo: document.getElementById('btn-novamente'),
+    verAuditoria: document.getElementById('btn-auditoria'),
+    painelAuditoria: document.getElementById('painel-auditoria'),
+    erro: document.getElementById('erro'),
+    modal: document.getElementById('modal'),
+    canvas: document.getElementById('confete')
+  };
+
+  if (cfg.teste) el.selo.hidden = false;
+  if (cfg.preview) {
+    el.faixa.hidden = false;
+  }
+  if (cfg.teste) {
+    el.sub.textContent = 'Ensaio · ao vivo em 18 de outubro';
+  } else {
+    el.sub.textContent = 'Ao vivo · 18 de outubro';
+  }
+
+  function texto(no, valor) { no.textContent = valor == null ? '' : String(valor); }
+
+  function formatar(n, digs) {
+    var num = Number(n);
+    if (!isFinite(num)) return String(n);
+    var s = String(Math.trunc(num));
+    while (s.length < digs) s = '0' + s;
+    return s;
+  }
+
+  function calcularDigitos(nums) {
+    var m = 2;
+    for (var i = 0; i < nums.length; i++) {
+      var t = String(Math.trunc(Number(nums[i]))).length;
+      if (isFinite(Number(nums[i])) && t > m) m = t;
+    }
+    return m;
+  }
+
+  function mostrarNumero(n) {
+    el.reel.innerHTML = '';
+    var div = document.createElement('div');
+    div.className = 'n';
+    div.textContent = n;
+    el.reel.appendChild(div);
+    el.reel.style.transform = 'translate3d(0,0,0)';
+  }
+
+  function mostrarPronto() {
+    el.janela.classList.remove('girando');
+    el.janela.classList.remove('parado');
+    mostrarNumero('••••');
+  }
+
+  function textoFaixa(menor, maior) {
+    if (menor === '' || menor == null) return '—';
+    if (String(menor) === String(maior)) return String(menor);
+    return String(menor) + ' ao ' + String(maior);
+  }
+
+  function aplicarEstado(r) {
+    total = r && r.total ? r.total : 0;
+    numerosAtuais = (r && r.numeros) ? r.numeros.slice() : [];
+    digsAtuais = calcularDigitos(numerosAtuais.length ? numerosAtuais : ['0']);
+    texto(el.total, total ? String(total) : '0');
+    el.btn.disabled = !total;
+    if (!total) {
+      texto(el.status, 'Ainda não há inscrições válidas.');
+      mostrarPronto();
+    } else if (!ultimo) {
+      texto(el.status, 'Tudo pronto para sortear.');
+      mostrarPronto();
+    }
+  }
+
+  function mostrarErro(msg) {
+    texto(el.erro, msg || '');
+    el.erro.hidden = !msg;
+  }
+
+  function fecharAuditoria() {
+    el.painelAuditoria.hidden = true;
+  }
+
+  function esconderResultado() {
+    el.resultado.hidden = true;
+    el.verAuditoria.hidden = true;
+    fecharAuditoria();
+  }
+
+  function mostrarGanhador(r) {
+    texto(el.nome, r.primeiroNome || 'Participante');
+    texto(el.codigo, r.codigoMascara || '•••••');
+    texto(el.quando, r.quando || '');
+    texto(el.hash, r.hashLista || '');
+    texto(el.seed, r.seed || '');
+    texto(el.indice, 'Índice ' + r.indice + ' de ' + r.total + ' · números ' + textoFaixa(r.menor, r.maior));
+    el.resultado.hidden = false;
+    el.btn.hidden = true;
+    el.deNovo.hidden = false;
+    el.verAuditoria.hidden = false;
+    mostrarErro('');
+  }
+
+  function embaralharVisual(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i];
+      a[i] = a[j];
+      a[j] = tmp;
+    }
+    return a;
+  }
+
+  function montarSequencia(nums, vencedor) {
+    var base = nums && nums.length ? nums.slice() : [vencedor];
+    var seq = [];
+    var voltas = base.length < 8 ? 6 : 3;
+    var v, i;
+    for (v = 0; v < voltas; v++) {
+      var rodada = embaralharVisual(base);
+      for (i = 0; i < rodada.length; i++) seq.push(rodada[i]);
+    }
+    if (seq.length > 36) seq = seq.slice(seq.length - 36);
+    if (String(seq[seq.length - 1]) === String(vencedor)) seq.pop();
+    seq.push(vencedor);
+    return seq;
+  }
+
+  function iniciarCiclo(nums, digs) {
+    var lista = nums.length ? nums : ['0'];
+    var i = 0;
+    var vivo = true;
+    var ultimoT = 0;
+    el.janela.classList.add('girando');
+    el.janela.classList.remove('parado');
+    function frame(now) {
+      if (!vivo) return;
+      if (now - ultimoT > 55) {
+        ultimoT = now;
+        mostrarNumero(formatar(lista[i % lista.length], digs));
+        i++;
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return function () { vivo = false; };
+  }
+
+  function animarPouso(seq, digs) {
+    return new Promise(function (resolve) {
+      el.reel.innerHTML = '';
+      for (var i = 0; i < seq.length; i++) {
+        var div = document.createElement('div');
+        div.className = 'n';
+        div.textContent = formatar(seq[i], digs);
+        el.reel.appendChild(div);
+      }
+      el.reel.style.transform = 'translate3d(0,0,0)';
+      el.janela.classList.add('girando');
+      el.janela.classList.remove('parado');
+      var destino = (seq.length - 1) * ALTURA;
+      var dur = 6400;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) dur = 400;
+      if (cfg.preview && /(?:\?|&)rapido=1(?:&|$)/.test(location.search)) dur = 0;
+      var inicio = performance.now();
+      function ease(t) { return 1 - Math.pow(1 - t, 3.4); }
+      function frame(now) {
+        var t = Math.min(1, (now - inicio) / dur);
+        el.reel.style.transform = 'translate3d(0,' + (-(ease(t) * destino)) + 'px,0)';
+        if (t > 0.86) el.janela.classList.remove('girando');
+        if (t < 1) requestAnimationFrame(frame);
+        else {
+          el.janela.classList.add('parado');
+          resolve();
+        }
+      }
+      requestAnimationFrame(function () { requestAnimationFrame(frame); });
+    });
+  }
+
+  function soltarConfete() {
+    var canvas = el.canvas;
+    var ctx = canvas.getContext('2d');
+    var palco = document.getElementById('palco');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = palco.clientWidth;
+    var h = palco.clientHeight;
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    var cores = ['#ffcc00', '#ff6f3c', '#e4002b', '#0057b8', '#ffffff', '#ffe680'];
+    var pecas = [];
+    var i;
+    for (i = 0; i < 110; i++) {
+      pecas.push({
+        x: Math.random() * canvas.width,
+        y: -Math.random() * canvas.height * 0.35,
+        w: (5 + Math.random() * 7) * dpr,
+        h: (8 + Math.random() * 10) * dpr,
+        c: cores[i % cores.length],
+        vy: (3.2 + Math.random() * 4.2) * dpr,
+        vx: (-1.8 + Math.random() * 3.6) * dpr,
+        rot: Math.random() * 6,
+        vr: -0.18 + Math.random() * 0.36
+      });
+    }
+    var inicio = performance.now();
+    function frame(now) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (var k = 0; k < pecas.length; k++) {
+        var p = pecas[k];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.06 * dpr;
+        p.rot += p.vr;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.c;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (now - inicio < 4200) requestAnimationFrame(frame);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function chamarServidor(nome, args) {
+    return new Promise(function (resolve, reject) {
+      var run = google.script.run
+        .withSuccessHandler(resolve)
+        .withFailureHandler(function (e) {
+          reject(new Error((e && e.message) || 'Não consegui falar com a planilha.'));
+        });
+      run[nome].apply(run, args);
+    });
+  }
+
+  function linhasPreview() {
+    return (cfg.participantes || []).map(function (p) {
+      return ['', p.numero, p.codigo, p.nome, '', p.status || 'válido', 'sim'];
+    });
+  }
+
+  function sortearLocal(novamente) {
+    var lista = SorteioPuro.prepararElegiveis(linhasPreview(), false);
+    if (!lista.length) return { ok: false, msg: 'Ainda não há inscrições válidas para sortear.' };
+    var carimbo = SorteioPuro.carimboDeData(new Date());
+    var s = SorteioPuro.escolher(lista, carimbo);
+    var resumo = SorteioPuro.resumir(lista);
+    return SorteioPuro.visaoPublica({
+      numero: s.ganhador.numero,
+      nome: s.ganhador.nome,
+      codigo: s.ganhador.codigo,
+      total: resumo.total,
+      menor: resumo.menor,
+      maior: resumo.maior,
+      numeros: resumo.numeros,
+      hashLista: s.hashLista,
+      seed: s.seed,
+      quando: s.quando,
+      indice: s.indice,
+      origem: novamente ? 'ao vivo (novamente)' : 'ao vivo'
+    });
+  }
+
+  function esperar(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+  }
+
+  function executar(novamente) {
+    if (ocupado || !total) return;
+    ocupado = true;
+    el.btn.disabled = true;
+    el.deNovo.disabled = true;
+    mostrarErro('');
+    esconderResultado();
+    texto(el.status, 'Os números estão girando…');
+    pararCiclo = iniciarCiclo(numerosAtuais, digsAtuais);
+    var t0 = performance.now();
+    var pedido = cfg.preview
+      ? Promise.resolve(sortearLocal(novamente))
+      : chamarServidor('sortearAoVivo', [cfg.chave, !!novamente]);
+    pedido.then(function (r) {
+      if (!r || !r.ok) throw new Error((r && r.msg) || 'Não foi possível sortear.');
+      var esperaMs = Math.max(0, 700 - (performance.now() - t0));
+      if (cfg.preview && /(?:\?|&)rapido=1(?:&|$)/.test(location.search)) esperaMs = 0;
+      return esperar(esperaMs).then(function () { return r; });
+    }).then(function (r) {
+      pararCiclo();
+      var nums = r.numeros && r.numeros.length ? r.numeros : numerosAtuais;
+      return animarPouso(montarSequencia(nums, r.numero), calcularDigitos(nums)).then(function () { return r; });
+    }).then(function (r) {
+      ultimo = r;
+      if (r.numeros && r.numeros.length) {
+        numerosAtuais = r.numeros.slice();
+        digsAtuais = calcularDigitos(numerosAtuais);
+        total = r.total;
+        texto(el.total, String(r.total));
+      }
+      mostrarGanhador(r);
+      texto(el.status, '');
+      soltarConfete();
+    }).catch(function (err) {
+      pararCiclo();
+      el.janela.classList.remove('girando');
+      if (ultimo) mostrarGanhador(ultimo);
+      else mostrarPronto();
+      mostrarErro((err && err.message) || 'Não foi possível sortear. Tente de novo.');
+    }).then(function () {
+      ocupado = false;
+      el.btn.disabled = !total;
+      el.deNovo.disabled = false;
+    });
+  }
+
+  function pedirConfirmacao() {
+    el.modal.hidden = false;
+    return new Promise(function (resolve) {
+      function fechar(sim) {
+        el.modal.hidden = true;
+        el.modal.querySelector('#modal-cancelar').removeEventListener('click', no);
+        el.modal.querySelector('#modal-confirmar').removeEventListener('click', yes);
+        resolve(sim);
+      }
+      function no() { fechar(false); }
+      function yes() { fechar(true); }
+      el.modal.querySelector('#modal-cancelar').addEventListener('click', no);
+      el.modal.querySelector('#modal-confirmar').addEventListener('click', yes);
+    });
+  }
+
+  el.verAuditoria.addEventListener('click', function () {
+    if (!ultimo) return;
+    el.painelAuditoria.hidden = false;
+  });
+  document.getElementById('auditoria-fechar').addEventListener('click', fecharAuditoria);
+
+  el.btn.addEventListener('click', function () { executar(false); });
+  el.deNovo.addEventListener('click', function () {
+    if (ocupado || modalAberto) return;
+    modalAberto = true;
+    pedirConfirmacao().then(function (sim) {
+      modalAberto = false;
+      if (sim) executar(true);
+    });
+  });
+
+  mostrarPronto();
+  // Só no preview: ?auto=1 sorteia sozinho e ?rapido=1 encurta a roleta, para conferir o layout.
+  if (cfg.preview && /(?:\?|&)auto=1(?:&|$)/.test(location.search)) {
+    aplicarEstado(SorteioPuro.resumir(SorteioPuro.prepararElegiveis(linhasPreview(), false)));
+    executar(false);
+    return;
+  }
+  if (cfg.preview) {
+    aplicarEstado(SorteioPuro.resumir(SorteioPuro.prepararElegiveis(linhasPreview(), false)));
+    return;
+  }
+  texto(el.status, 'Contando as inscrições válidas…');
+  chamarServidor('estadoSorteio', [cfg.chave]).then(function (r) {
+    if (!r || !r.ok) {
+      mostrarErro((r && r.msg) || 'Não foi possível ler as inscrições.');
+      el.btn.disabled = true;
+      return;
+    }
+    aplicarEstado(r);
+  }).catch(function () {
+    mostrarErro('Não foi possível ler as inscrições. Atualize a página.');
+    el.btn.disabled = true;
+  });
+}
+
+iniciarAoVivo({
+  "teste": true,
+  "chave": "",
+  "preview": true,
+  "participantes": [
+    {
+      "numero": 4,
+      "codigo": "TST-23ABC",
+      "nome": "Ana Lima"
+    },
+    {
+      "numero": 7,
+      "codigo": "TST-45DEF",
+      "nome": "Bruno Costa"
+    },
+    {
+      "numero": 8,
+      "codigo": "TST-67GHJ",
+      "nome": "Caio Mendes"
+    },
+    {
+      "numero": 12,
+      "codigo": "TST-89KLM",
+      "nome": "Diana Rocha"
+    },
+    {
+      "numero": 15,
+      "codigo": "TST-2NPQR",
+      "nome": "Elena Dias"
+    },
+    {
+      "numero": 18,
+      "codigo": "TST-3STVW",
+      "nome": "Felipe Nunes"
+    },
+    {
+      "numero": 21,
+      "codigo": "TST-4XYZA",
+      "nome": "Gaia Pinto"
+    },
+    {
+      "numero": 26,
+      "codigo": "TST-5BCD2",
+      "nome": "Heitor Cruz"
+    },
+    {
+      "numero": 33,
+      "codigo": "TST-6EFG3",
+      "nome": "Iris Melo"
+    },
+    {
+      "numero": 34,
+      "codigo": "TST-7HJK4",
+      "nome": "João Vargas"
+    },
+    {
+      "numero": 41,
+      "codigo": "TST-8LMN5",
+      "nome": "Lara Campos"
+    },
+    {
+      "numero": 52,
+      "codigo": "TST-9PQR6",
+      "nome": "Miguel Teixeira"
+    },
+    {
+      "numero": 58,
+      "codigo": "TST-2STV7",
+      "nome": "Nina Borges"
+    },
+    {
+      "numero": 63,
+      "codigo": "TST-3WXY8",
+      "nome": "Otávio Reis"
+    },
+    {
+      "numero": 71,
+      "codigo": "TST-4ZAB9",
+      "nome": "Paula Duarte"
+    },
+    {
+      "numero": 86,
+      "codigo": "TST-5CDE2",
+      "nome": "Rafael Gomes"
+    },
+    {
+      "numero": 90,
+      "codigo": "TST-6FGH3",
+      "nome": "Sofia teste"
+    },
+    {
+      "numero": 99,
+      "codigo": "TST-7JKL4",
+      "nome": "Cupom inválido",
+      "status": "inválido"
+    },
+    {
+      "numero": "",
+      "codigo": "TST-8MNP5",
+      "nome": "Sem Número",
+      "status": "válido"
+    }
+  ]
+});
+  </script>
+</body>
+</html>
