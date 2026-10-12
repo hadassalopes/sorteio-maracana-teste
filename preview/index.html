@@ -911,7 +911,9 @@ function iniciarAoVivo(cfg) {
       el.janela.classList.add('girando');
       el.janela.classList.remove('parado');
       var destino = (seq.length - 1) * ALTURA;
-      var dur = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 400 : 6400;
+      var dur = 6400;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) dur = 400;
+      if (cfg.preview && /(?:\?|&)rapido=1(?:&|$)/.test(location.search)) dur = 0;
       var inicio = performance.now();
       function ease(t) { return 1 - Math.pow(1 - t, 3.4); }
       function frame(now) {
@@ -1036,6 +1038,7 @@ function iniciarAoVivo(cfg) {
     pedido.then(function (r) {
       if (!r || !r.ok) throw new Error((r && r.msg) || 'Não foi possível sortear.');
       var esperaMs = Math.max(0, 700 - (performance.now() - t0));
+      if (cfg.preview && /(?:\?|&)rapido=1(?:&|$)/.test(location.search)) esperaMs = 0;
       return esperar(esperaMs).then(function () { return r; });
     }).then(function (r) {
       pararCiclo();
@@ -1093,6 +1096,12 @@ function iniciarAoVivo(cfg) {
   });
 
   mostrarPronto();
+  // Só no preview: ?auto=1 sorteia sozinho e ?rapido=1 encurta a roleta, para conferir o layout.
+  if (cfg.preview && /(?:\?|&)auto=1(?:&|$)/.test(location.search)) {
+    aplicarEstado(SorteioPuro.resumir(SorteioPuro.prepararElegiveis(linhasPreview(), false)));
+    executar(false);
+    return;
+  }
   if (cfg.preview) {
     aplicarEstado(SorteioPuro.resumir(SorteioPuro.prepararElegiveis(linhasPreview(), false)));
     return;
